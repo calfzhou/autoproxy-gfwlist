@@ -8,6 +8,11 @@
 # Print commands and their arguments as they are executed.
 set -ex
 
+use_proxy=false
+if [ "$1" = "--proxy" ]; then
+    use_proxy=true
+fi
+
 if [ -z "$GFWLIST_HOME" ]; then
     GFWLIST_HOME=/Users/zhouji/projects/autoproxy-gfwlist
 fi
@@ -21,7 +26,11 @@ function fetch_svn_updates() {
     local ret=0
     while true; do
         i=`expr $i + 1`
-        proxychains4 git svn fetch
+        if $use_proxy ; then
+            proxychains4 git svn fetch
+        else
+            git svn fetch
+        fi
         ret=$?
         if [ $ret -eq 0 ]; then
             break
@@ -38,7 +47,9 @@ cd "$GFWLIST_HOME"
 
 git checkout master
 
-ssh -D 7070 -f -p 22 gocalfco@gocalf.com sleep $proxy_duration
+if $use_proxy ; then
+    ssh -D 7070 -f -p 22 gocalfco@gocalf.com sleep $proxy_duration
+fi
 
 set +e
 if fetch_svn_updates; then

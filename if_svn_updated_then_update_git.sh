@@ -23,7 +23,7 @@ function handle_trigger() {
 
     if [ -f "$trigger_file" ]; then
         local tmp_file=`mktemp`
-        "$handler" 2>&1 | tee "$tmp_file"
+        "$handler" "$@" 2>&1 | tee "$tmp_file"
         local ret=${PIPESTATUS[0]}
         if [ $ret -eq 0 ]; then
             echo "$trigger_file process succeed"
